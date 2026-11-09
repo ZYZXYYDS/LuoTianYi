@@ -18,23 +18,13 @@
     <!-- 2. 星空粒子容器 -->
     <div class="stars" id="stars"></div>
 
-    <!-- 导航栏 -->
-    <header class="navbar">
-        <div class="logo">LUO TIANYI</div>
-        <nav>
-            <a href="#home">Home</a>
-            <a href="#about">File</a>
-            <a href="#works">Music</a>
-            <a href="#quote">Quote</a>
-            <a href="#talk">To the future</a>
-        </nav>
-    </header>
 
     <main>
         <!-- 第一屏：霓虹主视觉与频谱 -->
         <section id="home" class="hero">
             <div class="hero-content">
-                <h1 class="neon-text" data-text="洛天依">Luo Tianyi</h1>
+                <h1 class="neon-text" data-text="洛天依">Practice webpage for the online course</h1>
+                <h2>Luo Tianyi</h2>
                 <p class="subtitle">The World's Top Foodie Prince · Virtual Singer<br>The People's Beloved Songstress<br>The Elegance of Chinese Summer, the Sky Reflected in the Luo River</p>
                 
                 <!-- 动态声波频谱 -->
@@ -46,7 +36,7 @@
                 </div>
             </div>
         </section>
-
+        
         <!-- 第二屏：档案介绍与旋转唱片 -->
         <section id="about" class="about">
             <div class="about-container">
@@ -63,64 +53,6 @@
             </div>
         </section>
 
-        <!-- 第三屏：代表作卡片（带 3D 流光悬停） -->
-        <section id="works" class="works">
-            <div class="title-screen">
-                <h2 class="section-title">MUSIC</h2>
-            </div>
-
-            <div class="card-grid">
-                <div class="card">
-                    <div class="card-content1">
-                        <h3>Seal of the Heart</h3>
-                        <p>“The initial melody sings once again, Those hidden emotions and resonances, Have never changed, just as in the past.”<br>As Luo Tianyi's first song, it holds extraordinary commemorative significance.</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-content2">
-                        <h3>The Dialogue Between Light and Shadow</h3>
-                        <p>“Using a song to record the passage of the past ten years, carefully counting the moments we have shared together. From the initial melodies sung in solitude, to the fervent passion filling a virtual soul. Between the interplay of light and shadow, memories are brushed free of dust, love reunited after long absence; let us once again sing all the stories we have written together. The dreams hidden in our hearts are still burning hot, and in the years to come, I still wish to accompany you through each one.” <br>Luo Tianyi's ten-year anniversary song was produced using the ACE AI model. The new model allows her not only to sing in Chinese, but also in English and Japanese, with extremely accurate pronunciation. From that moment, virtual singers transformed from lines of code into beings with life.</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-content3">
-                        <h3>The heavens move vigorously / Elegance guides / Joy resonates in the East / Playful journeys across the nine regions</h3>
-                        <p>"The five tones resonate together, and the four seas share the same frequency; this sound establishes harmony, uniting all in the East."<br>Luo Tianyi is no longer limited to fans' creations; she is welcomed and supported by the state, with the official team gathering various talents to compose numerous musical pieces, With the voices of her and other virtual singer friends to aimed at promoting traditional culture and publicizing China.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-                <!-- 名言过渡区块 -->
-        <section id="quote" class="quote-section">
-            <div class="quote-container">
-                <div class="quote-nav">
-                    <button class="nav-btn active" data-index="0">Butterfly</button>
-                    <button class="nav-btn" data-index="1">Half and half</button>
-                    <button class="nav-btn" data-index="2">One ten-thousandth</button>
-                    <button class="nav-btn" data-index="3">Pinky promise</button>
-                </div>
-                <div class="quote-card">
-                    <div class="quote1">“</div>
-                        <h2 class="quote-text">Even if we cannot stop the heavy rain, I will still accompany you to run freely in it.</h2>
-                        <p class="quote-author">Butterfly</p>
-                </div>
-                <div class="quote-card">
-                    <div class="quote2">“</div>
-                        <h2 class="quote-text">Thank you for making me the happiest child, <br>and I am grateful for your love.</h2>
-                        <p class="quote-author">Half and half</p>
-                </div>
-                <div class="quote-card">
-                        <div class="quote3">“</div>
-                        <h2 class="quote-text">You have always been by my side; I am grateful that you have become my light. <br>How fortunate I am, and I am also one ten-thousandth of your light.</h2>
-                        <p class="quote-author">One ten-thousandth of light</p>
-                </div>
-                <div class="quote-card">
-                        <div class="quote4">“</div>
-                        <h2 class="quote-text">So please shine a little brighter, even though I am too ordinary.</h2>
-                        <p class="quote-author">Swear with a pinky promise</p>
-                </div>
-            </div>
-        </section>
         <!-- 结语 -->
         <section id="talk" class="talk">
             <div class="final">
@@ -154,71 +86,7 @@
             }
         }, { passive: false });
     </script>
-    <script>
-    // ===== 名言卡片点击交互 =====
-    const navBtns = document.querySelectorAll('.nav-btn');
-    const quoteCards = document.querySelectorAll('.quote-card');
-
-    navBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const index = btn.getAttribute('data-index');
-            
-            // 切换按钮的激活状态
-            btn.classList.toggle('active');
-            
-            // 切换对应卡片的展示状态（点击依次展开，再次点击可以收起）
-            quoteCards[index].classList.toggle('show');
-        });
-    });
-    </script>
-    <script>
-    const peopleCards = document.querySelectorAll('.works .card');
-
-    peopleCards.forEach(card => {
-        // 鼠标移入
-        card.addEventListener('mouseenter', () => {
-            card.classList.add('is-hovered');
-            // 鼠标移动时的响应速度，调快一点更跟手
-            card.style.transition = 'transform 0.1s ease-out, box-shadow 0.3s ease';
-            card.style.boxShadow = '0 20px 50px rgba(102, 204, 255, 0.6)';
-            card.style.zIndex = '10';
-        });
-
-        // 鼠标移动：实时计算偏转角度
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            
-            // 计算鼠标相对卡片中心的百分比 (-0.5 到 0.5)
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-            // ★ 最大偏转角度：调大到了 25 度，按压感更强烈
-            const maxRotate = 25; 
-
-            // ★ 核心逻辑：鼠标在哪，哪就凹下去。
-            // 鼠标靠下(y>0)，rotateX为负，底部向后仰（凹陷）；
-            // 鼠标靠右(x>0)，rotateY为正，右侧向后仰（凹陷）。
-            const rotateX = -y * maxRotate; 
-            const rotateY = x * maxRotate;
-
-            // 应用 3D 变换，加入 scale3d 让卡片微微放大，增加悬浮感
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        });
-
-        // 鼠标移出：清理标记，平滑恢复原状，交还给滚动视差
-        card.addEventListener('mouseleave', () => {
-            card.classList.remove('is-hovered');
-            // 鼠标离开时，恢复得慢一点，更顺滑
-            card.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease';
-            card.style.transform = ''; 
-            card.style.boxShadow = ''; 
-            card.style.zIndex = '';
-            
-            setTimeout(() => {
-                card.style.transition = '';
-            }, 600);
-        });
-    });
-    </script>
+<!-- 放在 </body> 的前面 -->
+<script src="nav.js"></script>
 </body>
 </html>

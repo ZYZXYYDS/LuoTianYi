@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luo Tianyi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpg" href="icon.jpg">
+</head>
+<body>
+        <!-- 第三屏：代表作卡片（带 3D 流光悬停） -->
+        <section id="works" class="works">
+            <div class="title-screen">
+                <h2 class="section-title">Project</h2>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-content1">
+                        <h3>Interactive 3D Works Portfolio Exhibition Hall</h3>
+                        <p>3D exhibition hall scene, with images and project cards placed on the page. The mouse wheel controls forward and backward movement, dragging left or right rotates the viewing angle, and clicking on an exhibit brings up a detail popup window or video preview.<br>Technology: HTML, CSS, JS, Three.js (many beginner templates)<br>Feature List:<br>1. 3D exhibition room model with artwork cards displayed on the walls<br>2. Drag to rotate the view and scroll to roam<br>3. Click on artwork to pop up details (description, screenshots, links)<br>4. Dark-themed, atmospheric UI with background music toggle</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content2">
+                        <h3>Dynamic Data Visualization Story Page</h3>
+                        <p>A scrolling narrative web page, where as you scroll down, charts, maps, and numerical animations change synchronously to tell a data story.Technology: HTML, CSS, JS, Chart.js / ECharts<br>Feature List:1. Scroll-triggered animations<br>2. Line charts, bar charts, simple heat maps<br>3. Dropdown to switch data for different years<br>4. Text narration and data labeling</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content3">
+                        <h3>Lightweight Online Vector Drawing & Inspiration </h3>
+                        <p>Whiteboard Web Version, supporting freehand brush, straight lines, rectangles, text, color changes, eraser, undo, and image export. <br>Technology: HTML Canvas, Native JS, CSS<br>Features:<br>1. Mouse freehand drawing and basic shape tools<br>2. Color picker, brush thickness adjustment, eraser<br>3. Undo / clear canvas<br>4. One-click save and download of the canvas as PNG</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content4">
+                        <h3>Immersive Timeline ・ History / Chronicle of Technological Development</h3>
+                        <p>An extra-long horizontal timeline used to display the development process of a subject (for example, the history of AI, the development history of web technologies, or the evolution of cameras).<br>Technology: HTML, CSS, JS, ScrollTrigger<br>Feature List:<br>1. Horizontal drag / horizontal scrolling timeline with mouse wheel<br>2. Node click to expand text and images, short videos, pictures<br>3. Timeline node entrance animations, gradient transitions<br>4. Dark, minimalist, high-end style</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content5">
+                        <h3>Web-Based Light and Shadow Particle Interaction Homepage</h3>
+                        <p>Full-screen particle background, where particles follow, converge, and disperse with mouse movement, creating a flowing light and shadow effect; the page overlays navigation, project cards, and descriptive text. <br>Technology: HTML, Canvas / p5.js<br>Feature List:<br>1. Mouse position drives particle movement and gravitational effects<br>>2. Particle color and density can switch between preset themes (cool blue / cyber purple)<br>3. Normal webpage content on top layer: navigation, introduction, and redirect buttons<br>4. Toggle button: turn particle effect on / off</p>
+                    </div>
+                </div>                
+        </section>
+        <script>
+    const peopleCards = document.querySelectorAll('.works .card');
+
+    peopleCards.forEach(card => {
+        // 鼠标移入
+        card.addEventListener('mouseenter', () => {
+            card.classList.add('is-hovered');
+            // 鼠标移动时的响应速度，调快一点更跟手
+            card.style.transition = 'transform 0.1s ease-out, box-shadow 0.3s ease';
+            card.style.boxShadow = '0 20px 50px rgba(102, 204, 255, 0.6)';
+            card.style.zIndex = '10';
+        });
+
+        // 鼠标移动：实时计算偏转角度
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            
+            // 计算鼠标相对卡片中心的百分比 (-0.5 到 0.5)
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+            // ★ 最大偏转角度：调大到了 25 度，按压感更强烈
+            const maxRotate = 25; 
+
+            // ★ 核心逻辑：鼠标在哪，哪就凹下去。
+            // 鼠标靠下(y>0)，rotateX为负，底部向后仰（凹陷）；
+            // 鼠标靠右(x>0)，rotateY为正，右侧向后仰（凹陷）。
+            const rotateX = -y * maxRotate; 
+            const rotateY = x * maxRotate;
+
+            // 应用 3D 变换，加入 scale3d 让卡片微微放大，增加悬浮感
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+
+        // 鼠标移出：清理标记，平滑恢复原状，交还给滚动视差
+        card.addEventListener('mouseleave', () => {
+            card.classList.remove('is-hovered');
+            // 鼠标离开时，恢复得慢一点，更顺滑
+            card.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease';
+            card.style.transform = ''; 
+            card.style.boxShadow = ''; 
+            card.style.zIndex = '';
+            
+            setTimeout(() => {
+                card.style.transition = '';
+            }, 600);
+        });
+    });
+    </script>
+<!-- 放在 </body> 的前面 -->
+<script src="nav.js"></script>
+</body>
+</html>

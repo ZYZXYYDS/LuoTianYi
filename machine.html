@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luo Tianyi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpg" href="icon.jpg">
+    <style>
+        /* ========== 抽签游戏专属样式 ========== */
+        body {
+            background-color: #050B14;
+            background-image: radial-gradient(circle at 50% 50%, rgba(102, 204, 255, 0.15) 0%, transparent 60%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 0;
+            padding-top: 80px; /* 给顶部导航栏留空间 */
+        }
+
+        /* 居中标题 */
+        .page-title {
+            color: #66CCFF;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(102, 204, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        /* 3D 舞台（放大尺寸） */
+        .machine-stage {
+            perspective: 1200px;
+            width: 420px;  /* ★ 放大宽度 */
+            height: 580px; /* ★ 放大高度 */
+            position: relative;
+            margin-top: 20px;
+            z-index: 10;
+        }
+
+        /* 卡片本体 */
+        .fortune-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+        }
+
+        /* 卡片正反面 */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(102, 204, 255, 0.3), inset 0 0 20px rgba(102, 204, 255, 0.2);
+            border: 2px solid rgba(102, 204, 255, 0.6);
+            background: linear-gradient(135deg, rgba(15, 25, 45, 0.9), rgba(5, 11, 20, 0.95));
+            backdrop-filter: blur(10px);
+            padding: 40px 30px; /* 加大内边距 */
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* 卡片正面（未翻开） */
+        .card-front {
+            background-image: url('696D9517C1E2C98BE1C910FF9F304D83.gif'); 
+            background-size: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #0a1122;
+        }
+
+        /* 卡片正面遮罩（大问号） */
+        .card-front::before {
+            content: '?';
+            position: absolute;
+            font-size: 150px;
+            color: #66CCFF;
+            opacity: 0.3;
+            font-weight: 900;
+            text-shadow: 0 0 30px #66CCFF;
+        }
+
+        /* 卡片背面（显示结果，添加了背景图） */
+        .card-back {
+            transform: rotateY(180deg);
+            /* ★ 添加背景图并用渐变遮罩压暗，保证文字清晰 */
+            background-image: 
+                linear-gradient(rgba(5, 11, 20, 0.3),rgba(5, 11, 20, 0.5)),
+                url('微信图片_20261102202844_158_35.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* 抽卡时的 3D 翻滚动画 */
+        .rolling {
+            animation: rollAndSpin 2.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes rollAndSpin {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
+            30% { transform: rotateX(360deg) rotateY(720deg) rotateZ(180deg) scale(1.1); }
+            70% { transform: rotateX(720deg) rotateY(1440deg) rotateZ(360deg) scale(0.9); }
+            100% { transform: rotateX(720deg) rotateY(1800deg) rotateZ(360deg) scale(1) rotateY(180deg); } 
+        }
+
+        /* 运势文本 */
+        .fortune-title {
+            font-size: 38px;
+            font-weight: 900;
+            color: #66CCFF;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(102, 204, 255, 0.6);
+            flex-shrink: 0;
+        }
+        
+        /* ★ 限制文本区域高度，超长时内部滚动 */
+        .fortune-desc {
+            font-size: 16px;
+            color: #ddd;
+            line-height: 1.8;
+            text-align: left;
+            width: 100%;
+            max-height: 280px; 
+            overflow-y: auto;
+            padding-right: 10px;
+            box-sizing: border-box;
+        }
+
+        /* 滚动条美化 */
+        .fortune-desc::-webkit-scrollbar { width: 6px; }
+        .fortune-desc::-webkit-scrollbar-thumb { background: rgba(102, 204, 255, 0.4); border-radius: 4px; }
+
+        .fortune-tag {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: rgba(102, 204, 255, 0.15);
+            border: 1px solid #66CCFF;
+            border-radius: 20px;
+            color: #66CCFF;
+            font-weight: bold;
+            font-size: 15px;
+            flex-shrink: 0;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        /* 抽卡按钮 */
+        .draw-btn {
+            margin-top: 40px;
+            padding: 15px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #050B14;
+            background: #66CCFF;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(102, 204, 255, 0.5);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .draw-btn:hover {
+            background: #88DDFF;
+            box-shadow: 0 0 30px rgba(102, 204, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        .draw-btn:disabled {
+            background: #555;
+            color: #888;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 全屏光晕特效 */
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(102, 204, 255, 0.25) 0%, transparent 60%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .glow.active { opacity: 1; }
+                /* 音频按钮样式 */
+        .audio-btn {
+            margin-top: 20px;
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #66CCFF;
+            background: rgba(5, 11, 20, 0.6);
+            border: 1px solid #66CCFF;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+        }
+
+        .audio-btn:hover {
+            background: rgba(102, 204, 255, 0.2);
+            box-shadow: 0 0 10px rgba(102, 204, 255, 0.3);
+        }
+
+        /* 播放中的发光特效 */
+        .audio-btn.playing {
+            background: #66CCFF;
+            color: #050B14;
+            box-shadow: 0 0 15px rgba(102, 204, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 抽卡区域 -->
+    <div class="glow" id="glow"></div>
+    <h2 class="page-title">Small Button — Tianyi's Fortune Test</h2>
+    <div class="machine-stage">
+        <div class="fortune-card" id="fortuneCard">
+            <!-- 卡片正面（未抽时） -->
+            <div class="card-face card-front"></div>
+            
+            <!-- 卡片背面（结果） -->
+            <div class="card-face card-back" id="cardBack">
+                <div class="fortune-title" id="fortuneTitle">Great fortune</div>
+                <div class="fortune-desc" id="fortuneDesc">Today is suitable for listening to music and creating. Tian Yi's singing will bring you good fortune.</div>
+                <div class="fortune-tag" id="fortuneTag"># May Heaven bless and protect you</div>
+                <button class="audio-btn" id="audioBtn" onclick="toggleAudio(event)">
+                    <span id="audioIcon">▶</span> <span id="audioText">Fortune Sound</span>
+                </button>
+                <!-- ★ 隐藏的音频播放器 -->
+                <audio id="fortuneAudio" loop></audio>
+            </div>
+        </div>
+    </div>
+
+    <button class="draw-btn" id="drawBtn">Today's Fortune Drawing</button>
+
+    <script>
+        // 准备运势库
+        const fortunes = [
+            {
+                title: "Great fortune🎊",
+                desc: "Human reunion brings blessings like a tide reaching the nine heavens.The golden mountain in the east sways, the silver sea in the west rises in waves.In the southern sky, immortal drums are beaten; from the Big Dipper, jade liquor fills the ladle. The rhythm of the drums pierces the dawn, and the waking lion leaps straight into the sky！",
+                tag: "# Sudden Inspiration——Golden Light Fortune",
+                bg: "1794233478403.jpeg",
+                audio: "金光.mp3"
+            },
+            {
+                title: "Moderate luck🎇",
+                desc: "The shadows of cassia trees sway, playing with the clouds' robes, gracefully stepping into the Moon Palace. Between me and the colorful clouds, who is the guest? The moon dances across the vast sky, lingering together. Why should I drink the wind and dew of the nine heavens? The jade plate's flowing light suddenly rushes by. A long song is directed toward the earth, scattering countless touches of color.",
+                tag: "# The Gentle Breeze Rides the Mood——Moonlight Dance",
+                bg: "29DCEDCBCE44EC052C1FA6CD634836C2.jpg",
+                audio: "月华.mp3"
+            },
+            {
+                title: "Small Luck🎐",
+                desc: "Looking at you, it seems surprised, yet the expression still feigns calm. Whether it is a blessing or a misfortune, or perhaps just... shyness.",
+                tag: "# Buddhist-style acceptance of fate——A Priceless Hazy Dream",
+                bg: "FFADDE160B94294AD4E330F1A3A23642.jpg",
+                audio: "千金.mp3"
+            },
+            {
+                title: "Slightly Unfortunate🎑",
+                desc: "ང་ཚོ་འདི་ལ་འཛོམས་འཛོམས། གཏན་དུ་འཛོམས་རྒྱུ་བྱུང་ན། གཏན་དུ་འཛོམས་པའི་མི་ལ། སྙུན་གཞི་གོད་ཆགས་མ་གཏོང༌།(We gather here, hoping to meet often. To those gathered here, we wish peace and prosperity.)",
+                tag: "# Please make sure to rest——Eye of the Snow Mountain",
+                bg: "1747824197507.jpeg",
+                audio: "雪山.mp3"
+            },
+            {
+                title: "Ordinary🍵",
+                desc: "Between your indifferent brows, one glimpses the joy and sorrow, frost and snow, of those who have parted.",
+                tag: "# Daily slacking off——Frost and Snow for a Thousand Years",
+                bg: "9098C8D030C818788081CE3F11046445.jpg",
+                audio: "霜雪.mp3"
+            },
+            {
+                title: "Special Class Visa♾️",
+                desc: "Seek wealth, fortune, luck, and contend in all matters. Life is dull without endeavor, and the magnificent landscape awaits me to explore！",
+                tag: "# Warm wishes to esteemed friends and old acquaintances: two parts of heaven and earth, three talents in harmony, all directions of the world, hundreds of thousands of living beings, ten thousand household lights——Dream Carps",
+                bg: "1738059884731.jpg",
+                audio: "梦化.mp3"
+            },
+            {
+                title: "Fierce🌩️",
+                desc: "Please don't follow me ,why do you why do you follow me?",
+                tag: "# Step back, step back, step back！——zetutai zetsumei",
+                bg: "9B24F2888C23DE1AAD15943A5299F81B.jpg",
+                audio: "绝体.mp3"
+            }
+        ];
+
+        const card = document.getElementById('fortuneCard');
+        const cardBack = document.getElementById('cardBack'); // ★ 获取卡背元素
+        const drawBtn = document.getElementById('drawBtn');
+        const glow = document.getElementById('glow');
+        const titleEl = document.getElementById('fortuneTitle');
+        const descEl = document.getElementById('fortuneDesc');
+        const tagEl = document.getElementById('fortuneTag');
+        // 获取音频相关的元素
+        const fortuneAudio = document.getElementById('fortuneAudio');
+        const audioBtn = document.getElementById('audioBtn');
+        const audioIcon = document.getElementById('audioIcon');
+        const audioText = document.getElementById('audioText');
+
+        let isRolling = false;
+
+// ★ 新增：控制音频播放/暂停的方法
+        window.toggleAudio = function(e) {
+            e.stopPropagation(); // 核心：阻止冒泡，防止点击按钮时卡片翻回正面！
+            
+            if (fortuneAudio.paused) {
+                fortuneAudio.play();
+                audioBtn.classList.add('playing');
+                audioIcon.textContent = '⏸';
+                audioText.textContent = 'Pause';
+            } else {
+                fortuneAudio.pause();
+                audioBtn.classList.remove('playing');
+                audioIcon.textContent = '▶';
+                audioText.textContent = 'Fortune Sound';
+            }
+        };
+
+        // ★ 新增：停止并重置音频状态的方法
+        function resetAudio() {
+            fortuneAudio.pause();
+            fortuneAudio.currentTime = 0;
+            audioBtn.classList.remove('playing');
+            audioIcon.textContent = '▶';
+            audioText.textContent = 'Fortune Sound';
+        }
+
+        drawBtn.addEventListener('click', () => {
+            if (isRolling) return;
+            isRolling = true;
+            drawBtn.disabled = true;
+            drawBtn.textContent = 'Young girl in prayer...';
+            
+            // 激活光晕
+            glow.classList.add('active');
+
+            // 1. 重置卡片状态并开始滚动动画
+            card.style.transition = 'none'; 
+            card.style.transform = 'none'; 
+            
+            // 强制重绘
+            void card.offsetWidth; 
+            
+            // 给卡片加上翻滚动画类
+            card.classList.add('rolling');
+
+            // 2. 在动画进行到大约 2 秒时，悄悄替换背后的文字内容和背景图
+            setTimeout(() => {
+                // 随机抽取一张运势
+                const randomIndex = Math.floor(Math.random() * fortunes.length);
+                const result = fortunes[randomIndex];
+
+                // 更新文字
+                titleEl.textContent = result.title;
+                descEl.textContent = result.desc;
+                tagEl.textContent = result.tag;
+
+                // ★ 核心修复：动态替换卡背的专属背景图（叠加深色遮罩保证文字清晰）
+                cardBack.style.backgroundImage = `linear-gradient(rgba(5, 11, 20, 0.3), rgba(5, 11, 20, 0.5)), url('${result.bg}')`;
+
+                fortuneAudio.src = result.audio;
+
+                // 根据运势调整文字颜色
+                if(result.title === "Special Class Visa♾️") {
+                    titleEl.style.color = "#FFD700";
+                    titleEl.style.textShadow = "0 0 20px rgba(255, 215, 0, 0.8)";
+                } else if(result.title === "Fierce🌩️") {
+                    titleEl.style.color = "#FF3366";
+                    titleEl.style.textShadow = "0 0 20px rgba(255, 51, 102, 0.8)";
+                } else {
+                    titleEl.style.color = "#66CCFF";
+                    titleEl.style.textShadow = "0 0 15px rgba(102, 204, 255, 0.6)";
+                }
+
+            }, 2000); // 在翻滚快结束时悄悄替换内容
+
+            // 3. 动画结束（2.5秒后）恢复状态
+            setTimeout(() => {
+                card.classList.remove('rolling');
+                // 保持最终翻转到背面的状态
+                card.style.transition = 'transform 0.8s ease';
+                card.style.transform = 'rotateY(180deg)';
+                
+                drawBtn.disabled = false;
+                drawBtn.textContent = 'Try again?';
+                isRolling = false;
+                
+                // 稍微减弱光晕
+                glow.classList.remove('active');
+                
+                // 如果点击卡片，可以翻回正面
+                card.onclick = () => {
+                    if (isRolling) return;
+                    resetAudio();
+                    card.style.transform = 'rotateY(0deg)';
+                    drawBtn.textContent = 'Fortune Drawing';
+                    // 移除 onclick 防止重复绑定
+                    card.onclick = null; 
+                };
+            }, 2500);
+        });
+    </script>
+<!-- 放在 </body> 的前面 -->
+<script src="nav.js"></script>
+</body>
+</html>

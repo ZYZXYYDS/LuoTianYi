@@ -105,7 +105,20 @@ body {
     flex-direction: column;
     align-items: center;
 }
-
+.hero-content > h2{
+    font-size: 40px;
+    color: #66CCFF;
+    margin-bottom: 30px;
+    position: relative;
+    display: inline-block;
+}
+.hero-content > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 0;
+    width: 50%; height: 3px;
+    background: linear-gradient(to right, #66CCFF, transparent);
+}
 /* 霓虹呼吸文字 */
 .neon-text {
     font-size: 120px;
@@ -301,7 +314,6 @@ body {
     flex-direction: column;
     background-image: url('微信图片_20261102202839_157_35.jpg');
     background-color: rgba(0,0,0,0.8);
-    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     position: relative;       
@@ -420,18 +432,37 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    
+    /* ★ 加上以下三行，让背景图完美铺满 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .card:hover > div[class^="card-content"] {
     transform: translateZ(30px); /* 内容浮出效果 */
 }
-.card > .card-content1 { background-image: url('微信图片_20261102202818_150_351.png');}
+.card > .card-content1 { background-image: url('微信图片_20261102202818_150_35.png');}
 .card > .card-content2 {background-image: url('微信图片_20261102202829_152_35.png');}
-.card > .card-content3 {background-image: url('17478241734101.jpeg')}
+.card > .card-content3 {background-image: url('17478240901421.png')}
+.card > .card-content4 {background-image: url('C63BA5FFBC5EEAB5E795725D726693D9.jpg')}
+.card > .card-content5 {background-image: url('61A7A98A3D43DF00409E7AA3FF6926611.jpg')}
 .card img {
     object-fit: contain;
     max-width: 80%;
     max-height: 40%;   
+}
+.card > .card-content1::before,
+.card > .card-content2::before,
+.card > .card-content3::before,
+.card > .card-content4::before,
+.card > .card-content5::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 11, 20, 0.2); /* 根据背景图亮度调整透明度 */
+    z-index: -1;
+    border-radius: 18px;
 }
 .card h3 {
     font-size: 32px;
@@ -458,18 +489,16 @@ body {
 /* ========== 名言过渡区块 ========== */
 .quote-section {
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     background-image: url('名言.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     position: relative;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
     box-sizing: border-box;
-    overflow: hidden;
+    padding: 100px 0;
 }
 
 /* 遮罩层：压暗背景，让白色和天依蓝文字更清晰 */
@@ -479,7 +508,6 @@ body {
     inset: 0;
     z-index: 1;
 }
-
 .quote-container {
     position: relative;
     z-index: 2;
@@ -487,22 +515,45 @@ body {
     width: 90%;
     max-width: 1400px;
     margin: 0 auto;
-    height: 100%;
-    padding: 80px 0;
-    box-sizing: border-box;
 }
 .quote-nav {
-    width: 260px;
+    width: 300px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    position: sticky;
     gap: 20px;
-    flex-shrink: 0;
+    top: 100px;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding-right: 15px;
 }
+.quote-nav::-webkit-scrollbar {
+    width: 6px;
+}
+.quote-nav::-webkit-scrollbar-thumb {
+    background: rgba(102, 204, 255, 0.3);
+    border-radius: 4px;
+}
+.quote-nav > h2{
+    font-size: 40px;
+    color: #66CCFF;
+    margin-bottom: 30px;
+    position: relative;
+    display: inline-block;
+}
+.quote-nav > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 0;
+    width: 50%; height: 3px;
+    background: linear-gradient(to right, #66CCFF, transparent);
+}
+
 .nav-btn {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(102, 204, 255, 0.2);
-    color: #ccc;
+    color: #7b7b7b;
     padding: 16px 20px;
     border-radius: 12px;
     cursor: pointer;
@@ -510,6 +561,7 @@ body {
     text-align: left;
     font-size: 16px;
     backdrop-filter: blur(5px);
+    flex-shrink: 0;
 }
 
 .nav-btn:hover {
@@ -526,6 +578,15 @@ body {
     box-shadow: 0 0 20px rgba(102, 204, 255, 0.4);
     border-color: #66CCFF;
 }
+
+.navbar a.active {
+    color: #66CCFF;
+    font-weight: bold;
+}
+.navbar a.active::after {
+    width: 100%; /* 强行让下划线展开 */
+}
+
 .quote-display {
     flex: 1;
     display: flex;
@@ -533,17 +594,10 @@ body {
     gap: 30px; /* 卡片之间的垂直间距 */
     padding-left: 60px;
     padding-right: 40px;
-    overflow-y: auto; /* 卡片多时允许内部滚动 */
-    scrollbar-width: none; 
-    padding-top: 50px;
-    padding-bottom: 50px;
-}
-.quote-display::-webkit-scrollbar {
-    display: none;
 }
 .quote-card {
-    width: 85%;
-    max-width: 650px;
+    width: 100%;
+    max-width: 800px;
     background: rgba(15, 20, 35, 0.7);
     backdrop-filter: blur(10px);
     border-radius: 16px;
@@ -560,11 +614,11 @@ body {
 }
 .quote-card:nth-child(odd) {
     align-self: flex-end; /* 奇数项靠右 */
-    transform: translateX(150px) scale(0.95); /* 初始在更右侧，准备向左滑入 */
+    transform: translateX(100px) scale(0.95);  /* 初始在更右侧，准备向左滑入 */
 }
 .quote-card:nth-child(even) {
     align-self: flex-start; /* 偶数项靠左 */
-    transform: translateX(-150px) scale(0.95); /* 初始在更左侧，准备向右滑入 */
+    transform: translateX(-100px) scale(0.95); /* 初始在更左侧，准备向右滑入 */
 }
 
 /* ★ 激活状态（滑入并显示） */
@@ -575,7 +629,6 @@ body {
 }
 
 .quote-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(102, 204, 255, 0.2);
     border-color: rgba(102, 204, 255, 0.5);
 }
@@ -586,23 +639,13 @@ body {
     top: 0; left: 0; 
     width: 4px; height: 100%;
     background: linear-gradient(to bottom, #66CCFF, #FF66CC);
-}
-
-/* 巨大的引号装饰 */
-.quote-mark {
-    position: absolute;
-    top: 10px; right: 20px;
-    font-size: 100px;
-    font-family: 'Georgia', serif;
-    color: #66CCFF;
-    line-height: 0.5;
-    opacity: 0.1;
-    pointer-events: none;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
 }
 
 /* 名言正文 */
 .quote-text {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 500;
     color: #fff;
     line-height: 1.6;
@@ -710,43 +753,30 @@ footer {
         transform: translateX(-50%);
     }
        /* 手机端名言区块适配 */
-    .quote-layout {
+        /* 手机端名言页面适配 */
+    .quote-container {
         flex-direction: column;
-        padding: 100px 5vw 40px;
     }
-    
     .quote-nav {
+        position: relative; /* 取消吸附 */
+        top: 0;
         width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 30px;
-        gap: 10px;
+        max-height: none; /* 取消高度限制 */
+        margin-bottom: 40px;
+        padding-right: 0;
     }
-    
-    .nav-btn {
-        padding: 10px 15px;
-        font-size: 14px;
-        text-align: center;
-    }
-    
     .quote-display {
         padding: 0;
-        gap: 20px;
     }
-    
     .quote-card {
-        width: 100%;
         padding: 20px;
     }
-    
-    /* 手机端取消左右错落，保证阅读空间 */
+    /* 手机端取消左右错落，全部居中 */
     .quote-card:nth-child(odd),
     .quote-card:nth-child(even) {
         align-self: center;
-        transform: translateY(50px) scale(0.95);
+        transform: translateY(30px) scale(0.95);
     }
-    
     .quote-card.show {
         transform: translateY(0) scale(1);
     }
