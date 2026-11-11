@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天依的抽卡小游戏</title>
+    <link rel="icon" type="image/jpg" href="icon.jpg">
+    <style>
+        /* ★ 基础重置与页面居中 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        body {
+            background-color: #050B14;
+            background-image: radial-gradient(circle at 50% 50%, rgba(102, 204, 255, 0.15) 0%, transparent 60%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* 标题 */
+        .page-title { color: #66CCFF; font-size: 32px; margin-bottom: 20px; text-shadow: 0 0 15px rgba(102, 204, 255, 0.5); letter-spacing: 2px; }
+
+        /* 3D 舞台 */
+        .machine-stage { perspective: 1200px; width: 420px; height: 580px; position: relative; margin-top: 20px; z-index: 10; }
+        .fortune-card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); cursor: pointer; }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(102, 204, 255, 0.3), inset 0 0 20px rgba(102, 204, 255, 0.2);
+            border: 2px solid rgba(102, 204, 255, 0.6);
+            background: linear-gradient(135deg, rgba(15, 25, 45, 0.9), rgba(5, 11, 20, 0.95));
+            backdrop-filter: blur(10px); padding: 40px 30px; text-align: center;
+        }
+
+        /* 卡片正面 */
+        .card-front { background-image: url('696D9517C1E2C98BE1C910FF9F304D83.gif'); background-size: 100%; background-position: center; background-repeat: no-repeat; background-color: #0a1122; }
+        .card-front::before { content: '?'; position: absolute; font-size: 150px; color: #66CCFF; opacity: 0.3; font-weight: 900; text-shadow: 0 0 30px #66CCFF; }
+
+        /* 卡片背面 */
+        .card-back {
+            transform: rotateY(180deg);
+            background-image: linear-gradient(rgba(5, 11, 20, 0.4), rgba(5, 11, 20, 0.6)), url('微信图片_20261102202844_158_35.jpg');
+            background-size: cover; background-position: center;
+        }
+
+        /* 翻滚动画 */
+        .rolling { animation: rollAndSpin 2.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; }
+        @keyframes rollAndSpin {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
+            30% { transform: rotateX(360deg) rotateY(720deg) rotateZ(180deg) scale(1.1); }
+            70% { transform: rotateX(720deg) rotateY(1440deg) rotateZ(360deg) scale(0.9); }
+            100% { transform: rotateX(720deg) rotateY(1800deg) rotateZ(360deg) scale(1) rotateY(180deg); } 
+        }
+
+        /* 文本样式 */
+        .fortune-title { font-size: 38px; font-weight: 900; color: #66CCFF; margin-bottom: 20px; text-shadow: 0 0 15px rgba(102, 204, 255, 0.6); flex-shrink: 0; }
+        .fortune-desc { font-size: 16px; color: #fff; line-height: 1.8; text-align: left; width: 100%; max-height: 280px; overflow-y: auto; padding-right: 10px; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
+        .fortune-desc::-webkit-scrollbar { width: 6px; }
+        .fortune-desc::-webkit-scrollbar-thumb { background: rgba(102, 204, 255, 0.4); border-radius: 4px; }
+        
+        .fortune-tag {
+            margin-top: 20px; padding: 10px 20px; background: rgba(5, 11, 20, 0.6); border: 1px solid #66CCFF;
+            border-radius: 20px; color: #66CCFF; font-weight: bold; font-size: 15px; flex-shrink: 0; max-width: 100%; word-wrap: break-word; backdrop-filter: blur(4px);
+        }
+
+        /* 按钮 */
+        .draw-btn {
+            margin-top: 40px; padding: 15px 50px; font-size: 20px; font-weight: bold; color: #050B14;
+            background: #66CCFF; border: none; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(102, 204, 255, 0.5); transition: all 0.3s ease; z-index: 10;
+        }
+        .draw-btn:hover { background: #88DDFF; box-shadow: 0 0 30px rgba(102, 204, 255, 0.8); transform: translateY(-3px); }
+        .draw-btn:disabled { background: #555; color: #888; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        /* 光晕 */
+        .glow {
+            position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(102, 204, 255, 0.25) 0%, transparent 60%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 1; opacity: 0; transition: opacity 0.5s ease;
+        }
+        .glow.active { opacity: 1; }
+
+        /* 音频按钮 */
+        .audio-btn {
+            margin-top: 20px; padding: 10px 25px; font-size: 14px; font-weight: bold; color: #66CCFF;
+            background: rgba(5, 11, 20, 0.6); border: 1px solid #66CCFF; border-radius: 20px;
+            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; z-index: 20; backdrop-filter: blur(5px);
+        }
+        .audio-btn:hover { background: rgba(102, 204, 255, 0.2); box-shadow: 0 0 10px rgba(102, 204, 255, 0.3); }
+        .audio-btn.playing { background: #66CCFF; color: #050B14; box-shadow: 0 0 15px rgba(102, 204, 255, 0.8); }
+    </style>
+</head>
+<body>
+    <div class="glow" id="glow"></div>
+    <h2 class="page-title">天依的运势小游戏</h2>
+    
+    <div class="machine-stage">
+        <div class="fortune-card" id="fortuneCard">
+            <div class="card-face card-front"></div>
+            <div class="card-face card-back" id="cardBack">
+                <div class="fortune-title" id="fortuneTitle">大吉</div>
+                <div class="fortune-desc" id="fortuneDesc">今天适合听音乐和创作，天依的歌声会给你带来好运。</div>
+                <div class="fortune-tag" id="fortuneTag"># 天依保佑</div>
+                
+                <button class="audio-btn" id="audioBtn" onclick="toggleAudio(event)">
+                    <span id="audioIcon">▶</span> <span id="audioText">整点小曲</span>
+                </button>
+                <audio id="fortuneAudio" loop></audio>
+            </div>
+        </div>
+    </div>
+
+    <button class="draw-btn" id="drawBtn">今日运势</button>
+
+    <script>
+        const fortunes = [
+            {
+                title: "大吉🎊",
+                desc: "人间团圆相，福气如潮接九霄。东边金山摇，西边银海浪浪高。南天仙鼓敲，北斗玉液斟满瓢。鼓点撞破晨晓，醒狮跃直破碧霄！",
+                tag: "# 灵感爆发——金光开运",
+                bg: "1794233478403.jpeg",
+                audio: "金光.mp3" // 请替换为对应的音频文件名
+            },
+            {
+                title: "中吉🎇",
+                desc: "桂影婆娑弄云裳，款款步入蟾宫来。我与彩云谁为客，月舞长空共徘徊。九霄风露何须饮，玉盘流光忽飞快。长歌一阙向大地，散落多少抹色彩？",
+                tag: "# 清风乘兴——月华舞",
+                bg: "29DCEDCBCE44EC052C1FA6CD634836C2.jpg",
+                audio: "月华.mp3"
+            },
+            {
+                title: "小吉🎐",
+                desc: "看着你好似惊讶，却还在故作冷静的面孔。不知是福，不知是祸，或者只是害羞。",
+                tag: "# 佛系随缘——千金胧梦",
+                bg: "FFADDE160B94294AD4E330F1A3A23642.jpg",
+                audio: "千金.mp3"
+            },
+            {
+                title: "末吉🎑",
+                desc: "ང་ཚོ་འདི་ལ་འཛོམས་འཛོམས། གཏན་དུ་འཛོམས་རྒྱུ་བྱུང་ན། གཏན་དུ་འཛོམས་པའི་མི་ལ། སྙུན་གཞི་གོད་ཆགས་མ་གཏོང༌།(我们在此相聚，希望可以常聚。在此相聚的人们，祝愿平安富足)",
+                tag: "# 日月同辉——雪山之眼",
+                bg: "1747824197507.jpeg",
+                audio: "雪山.mp3"
+            },
+            {
+                title: "平🍵",
+                desc: "在你那淡漠眉间，瞥见离人的喜悲霜雪。",
+                tag: "# 暮雨点滴——霜雪千年",
+                bg: "9098C8D030C818788081CE3F11046445.jpg",
+                audio: "霜雪.mp3"
+            },
+            {
+                title: "上上签♾️",
+                desc: "求财气运气福气凡事争口气，人生不奔忙也无趣，大好江山待我去游历！",
+                tag: "# 恭祝高朋旧友：贰分天地，叁才并济，肆方天下，百千生灵，万家灯火——梦化鲤",
+                bg: "1738059884731.jpg",
+                audio: "梦化.mp3"
+            },
+            {
+                title: "凶🌩️",
+                desc: "Please don't follow me ,why do you why do you follow me?",
+                tag: "# 黎明死星——绝体绝命",
+                bg: "9B24F2888C23DE1AAD15943A5299F81B.jpg",
+                audio: "绝体.mp3"
+            }
+        ];
+
+        const card = document.getElementById('fortuneCard');
+        const cardBack = document.getElementById('cardBack');
+        const drawBtn = document.getElementById('drawBtn');
+        const glow = document.getElementById('glow');
+        const titleEl = document.getElementById('fortuneTitle');
+        const descEl = document.getElementById('fortuneDesc');
+        const tagEl = document.getElementById('fortuneTag');
+        const fortuneAudio = document.getElementById('fortuneAudio');
+        const audioBtn = document.getElementById('audioBtn');
+        const audioIcon = document.getElementById('audioIcon');
+        const audioText = document.getElementById('audioText');
+
+        let isRolling = false;
+
+        window.toggleAudio = function(e) {
+            e.stopPropagation();
+            if (fortuneAudio.paused) {
+                fortuneAudio.play();
+                audioBtn.classList.add('playing');
+                audioIcon.textContent = '⏸';
+                audioText.textContent = '暂停';
+            } else {
+                fortuneAudio.pause();
+                audioBtn.classList.remove('playing');
+                audioIcon.textContent = '▶';
+                audioText.textContent = '整点小曲';
+            }
+        };
+
+        function resetAudio() {
+            fortuneAudio.pause();
+            fortuneAudio.currentTime = 0;
+            audioBtn.classList.remove('playing');
+            audioIcon.textContent = '▶';
+            audioText.textContent = '整点小曲';
+        }
+
+        drawBtn.addEventListener('click', () => {
+            if (isRolling) return;
+            isRolling = true;
+            drawBtn.disabled = true;
+            drawBtn.textContent = '少女祈祷中...';
+            glow.classList.add('active');
+            resetAudio();
+
+            card.style.transition = 'none'; 
+            card.style.transform = 'none'; 
+            void card.offsetWidth; 
+            card.classList.add('rolling');
+
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * fortunes.length);
+                const result = fortunes[randomIndex];
+
+                titleEl.textContent = result.title;
+                descEl.textContent = result.desc;
+                tagEl.textContent = result.tag;
+                cardBack.style.backgroundImage = `linear-gradient(rgba(5, 11, 20, 0.4), rgba(5, 11, 20, 0.6)), url('${result.bg}')`;
+                
+                if(result.audio) {
+                    fortuneAudio.src = result.audio;
+                }
+
+                if(result.title === "上上签♾️") {
+                    titleEl.style.color = "#FFD700";
+                    titleEl.style.textShadow = "0 0 20px rgba(255, 215, 0, 0.8)";
+                } else if(result.title === "凶🌩️") {
+                    titleEl.style.color = "#FF3366";
+                    titleEl.style.textShadow = "0 0 20px rgba(255, 51, 102, 0.8)";
+                } else {
+                    titleEl.style.color = "#66CCFF";
+                    titleEl.style.textShadow = "0 0 15px rgba(102, 204, 255, 0.6)";
+                }
+            }, 2000);
+
+            setTimeout(() => {
+                card.classList.remove('rolling');
+                card.style.transition = 'transform 0.8s ease';
+                card.style.transform = 'rotateY(180deg)';
+                
+                drawBtn.disabled = false;
+                drawBtn.textContent = '再来一次?';
+                isRolling = false;
+                glow.classList.remove('active');
+                
+                card.onclick = () => {
+                    if (isRolling) return;
+                    resetAudio();
+                    card.style.transform = 'rotateY(0deg)';
+                    drawBtn.textContent = '抽签';
+                    card.onclick = null; 
+                };
+            }, 2500);
+        });
+    </script>
+</body>
+</html>
